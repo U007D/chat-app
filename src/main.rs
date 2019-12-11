@@ -11,7 +11,8 @@ enum MyError {
 }
 //FYI to self impl std::error::Error for Error {} // implement trait for type, Error type is now impls std error trait
 
-fn main(){
+fn main() -> Result<()> {
 //    println!("Hello, {:?}", env::args().nth(1).ok_or(MissingNameArg)?);
     ChatWindow::run(Settings::default());
+    Ok(())
 }
