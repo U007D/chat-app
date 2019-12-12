@@ -17,7 +17,7 @@ A XAND Learning project to create an async chat app to enable users to talk to e
 Get the dependencies for [iced](https://docs.rs/iced/0.1.0-beta/iced/) to work properly:
 
 ```
-sudo apt-get install cmake freetype2 libasound2-dev libexpat1-dev libfreetype6-dev libssl-dev libxcb-composite0-dev libxss-dev libvulkan1 mesa-vulkan-drivers openbox pkg-config vulkan-utils11304 xorg 
+sudo apt-get install cmake libasound2-dev libexpat1-dev libfreetype6-dev libssl-dev libxcb-composite0-dev libxss-dev libvulkan1 mesa-vulkan-drivers openbox pkg-config vulkan-utils xorg 
 sudo add-apt-repository ppa:oibaf/graphics-drivers
 sudo apt update && sudo apt upgrade
 ```
