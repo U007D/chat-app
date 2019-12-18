@@ -1,3 +1,5 @@
+#[cfg(test)]
+mod unit_tests;
 use iced::{Application, Command, Column, Element, Text};
 use std::default::Default;
 
