@@ -1,5 +1,5 @@
 [package]
-name = "chat"
+name = "learning_chat"
 version = "0.1.0"
 authors = ["marianne.goldin <marianne@transparentinc.co>"]
 edition = "2018"
@@ -8,3 +8,4 @@ edition = "2018"
 
 [dependencies]
 iced = "0.1.0-beta"
+get_if_addrs = "0.5.3"
