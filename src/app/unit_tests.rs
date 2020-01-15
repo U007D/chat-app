@@ -2,6 +2,8 @@ use crate::MyError;
 use super::*;
 //use std::net::{TcpListener, TcpStream};
 use crate::Result;
+use Ipv4Addr;
+use std::net::TcpListener;
 
 pub enum Message {
     Ping,
@@ -20,6 +22,13 @@ fn start__app_starts() -> Result<()> {
     // Then
     assert_eq!(res, expected_addr);
     Ok(())
+}
+
+#[test]
+fn ping__server_responds_with_message() {
+    let server = TcpListener::bind("127.0.0.1").unwrap();
+    let app = tungstenite::accept_hdr(stream.unwrap(), callback).unwrap;
+    // TODO assert
 }
 
 //#[test]
