@@ -5,7 +5,7 @@ use iced::{Application, Command, Column, Element, Text};
 use std::default::Default;
 use std::net::Ipv4Addr;
 use crate::Result;
-use crate::MyError;
+use crate::Error;
 
 pub struct App {}
 
@@ -19,10 +19,10 @@ impl App {
         addrs
             .into_iter()
             .nth(0)
-            .map_or_else(||Err(MyError::NoIpAddrFound), | intrfc | {
+            .map_or_else(||Err(Error::NoIpAddrFound), |intrfc | {
                 match intrfc.addr {
                     IfAddr::V4(addr) => Ok(addr.ip),
-                    IfAddr::V6(addr) => Err(MyError::IpTypeMismatch)
+                    IfAddr::V6(addr) => Err(Error::IpTypeMismatch)
                 }
             })
     }

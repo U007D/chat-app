@@ -4,9 +4,9 @@ use iced::{Settings, Application};
 //use crate::MyError::MissingNameArg;
 //use std::env;
 use app::ChatWindow;
-use error::MyError;
+use error::Error;
 
-type Result<T, E = MyError> = std::result::Result<T, E>;
+type Result<T, E = Error> = std::result::Result<T, E>;
 
 //FYI to self impl std::error::Error for Error {} // implement trait for type, Error type is now impls std error trait
 
