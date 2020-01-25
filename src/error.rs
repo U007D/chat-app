@@ -1,16 +1,16 @@
-use std::io::Error;
+use std::io::Error as IoError;
 
 #[derive(Debug)]
 pub enum Error {
     MissingNameArg,
     NoIpAddrFound,
     IpTypeMismatch,
-    IoError(std::io::Error),
+    IoError(IoError),
     NonTextMessageReceived,
 }
 
-impl From<std::io::Error> for Error {
-    fn from(err: std::io::Error) -> Self {
+impl From<IoError> for Error {
+    fn from(err: IoError) -> Self {
         Error::IoError(err)
     }
 }

@@ -53,17 +53,3 @@ fn ping__live_socket_replies_with_pong() {
     assert_eq!(res, Ok("pong".to_string()));
 }
 
-//#[test]
-//fn start__app_responds_to_ping() -> Result<String> {
-//    // Given
-//    let app = App::new();
-//
-//    // When
-//    let address = app.start()?;
-//    let msg = Message::Ping;
-//    // Test: communicate with app via a tcp stream by sending it the message
-//    // To come: starting tcp listener is in the impl of the app
-//
-//    // Then
-//    assert_eq!(res, "OK");
-//}
