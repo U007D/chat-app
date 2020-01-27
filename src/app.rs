@@ -1,22 +1,37 @@
 #[cfg(test)]
 mod unit_tests;
-use get_if_addrs::{get_if_addrs, IfAddr};
-use iced::{Application, Command, Column, Element, Text};
+
+use std::thread::{self, JoinHandle, spawn};
 use std::default::Default;
-use std::net::Ipv4Addr;
+use std::net::{TcpListener, Ipv4Addr, TcpStream};
+
+use iced::{Application, Command, Column, Element, Text};
+use get_if_addrs::{get_if_addrs, IfAddr};
+use tungstenite::{
+    self,
+    stream::Stream,
+    WebSocket,
+    accept_hdr,
+    handshake::server::{Request, Response}
+};
+
 use crate::Result;
 use crate::Error;
 
-pub struct App {}
+pub struct App {
+    socket: Option<tungstenite::WebSocket<Stream::Plain(String)>>,
+    server: Option<TcpListener>,
+    serverHandler: Option<JoinHandle<()>>
+}
 
 impl App {
     pub fn new() -> Self {
-        Self{}
+        Self{ socket: None, server: None, serverHandler: None }
     }
 
-    pub fn start(&self) -> Result<Ipv4Addr> {
+    pub fn start(&mut self) -> Result<Ipv4Addr> {
         let addrs = get_if_addrs()?;
-        addrs
+        let default_addr = addrs
             .into_iter()
             .nth(0)
             .map_or_else(||Err(Error::NoIpAddrFound), |intrfc | {
@@ -24,7 +39,54 @@ impl App {
                     IfAddr::V4(addr) => Ok(addr.ip),
                     IfAddr::V6(addr) => Err(Error::IpTypeMismatch)
                 }
-            })
+            });
+        self.start_server(default_addr)?;
+        self.serverHandler = Some(thread::spawn(|| {
+            self.listen_for_connections();
+        }));
+        default_addr
+    }
+
+    fn start_server(&mut self, address: String) -> Result<()> {
+        let server = TcpListener::bind(address);
+        let server  = match server {
+            Ok(server) => server,
+            Err(s) => return Err(Error::from(s))
+        };
+        self.server = Some(server);
+        Ok(())
+    }
+
+    fn listen_for_connections(&mut self) -> Result<()> {
+        if let None = self.server {
+            return Err(Error::NoIpAddrFound);
+        }
+
+        for stream in self.server.unwrap().incoming() {
+            self.accept_handshake(stream.unwrap());
+        }
+
+        Ok(())
+    }
+
+    fn new_connection(req: &Request, mut response: Response) -> Result<Response> {
+        println!("Received a new ws handshake");
+        println!("The request's path is: {}", req.uri().path());
+        println!("The request's headers are:");
+        for (ref header, _value) in req.headers() {
+            println!("* {}", header);
+        }
+        Ok(response)
+    }
+
+    fn accept_handshake(&mut self, stream: TcpStream) -> Result<()> {
+        self.socket = Some(accept_hdr(stream, self.new_connection))
+    }
+
+    fn monitor_socket(mut socket: tungstenite::WebSocket<Stream::Plain(String)>) {
+        loop {
+            let msg = socket.read_message()
+        }
     }
 }
 

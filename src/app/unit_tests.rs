@@ -17,7 +17,7 @@ pub enum Message {
 }
 
 fn ping(mut socket: tungstenite::WebSocket<Stream::Plain(String)>) -> Result<String> {
-    socket.write_message(Message::Text("Ping".into()))?;
+    socket.write_message(Message::Text("ping".into()))?;
     match socket.read_message()? {
         Message::Text(s) => Ok(s),
         _ => Err(Error::NonTextMessageReceived),
