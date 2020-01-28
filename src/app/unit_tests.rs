@@ -5,11 +5,6 @@ use crate::{
 use super::*;
 use Ipv4Addr;
 use std::net::TcpListener;
-use tungstenite::{
-    self,
-    stream::Stream,
-    WebSocket
-};
 
 pub enum Message {
     Ping,

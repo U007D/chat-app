@@ -1,5 +1,5 @@
 use std::io::Error as IoError;
-
+use ws::Error as WsError;
 #[derive(Debug)]
 pub enum Error {
     MissingNameArg,
@@ -7,6 +7,7 @@ pub enum Error {
     IpTypeMismatch,
     IoError(IoError),
     NonTextMessageReceived,
+    WebSocket(WsError),
 }
 
 impl From<IoError> for Error {
@@ -15,3 +16,8 @@ impl From<IoError> for Error {
     }
 }
 
+impl From<WsError> for Error {
+    fn from(err: WsError) -> Self {
+        Error::WebSocket(err)
+    }
+}
