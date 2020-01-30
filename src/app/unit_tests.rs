@@ -4,6 +4,9 @@ use crate::{
 };
 use super::*;
 use std::net::{TcpListener, Ipv4Addr};
+use ws::{connect, CloseCode, Handler};
+use std::cell::{Cell, RefCell};
+use std::rc::Rc;
 
 pub enum Message {
     Ping,
@@ -29,11 +32,23 @@ fn start__app_starts() -> Result<()> {
 fn ping__live_socket_replies_with_pong() {
     // Given
     let expected_socket = SocketAddr::from(([127,0,0,1], 4444));
-    let app = App::start()?;
-    let listner_socket = app.local_socket;
+    let stringly_socket = expected_socket.to_string();
+    let app = App::start().unwrap();
+    let listener_socket = app.local_socket;
+    let refcell = RefCell::<String>::new(String::new());
+    let mut input_string = Rc::<RefCell<String>>::new(refcell);
 
     // When
+    let sut = connect(stringly_socket, |out| {
+        out.send("ping").unwrap();
+
+        move |msg: ws::Message| {
+            println!("Received message {:?}", msg);
+            *input_string.borrow_mut() = msg.to_string();
+            out.close(CloseCode::Normal)
+        }
+    }).unwrap();
 
     // Then
+    assert_eq!(*Rc::make_mut(&mut input_string), RefCell::new(String::from("pong")));
 }
-
