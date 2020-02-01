@@ -1,25 +1,23 @@
-use crate::{
-    Error,
-    Result
-};
 use super::*;
-use std::net::{TcpListener, Ipv4Addr};
-use ws::{connect, CloseCode, Handler};
-use std::cell::{Cell, RefCell};
-use std::rc::Rc;
-use std::borrow::{BorrowMut, Borrow};
+use crate::{Error, Result};
 use std::any::Any;
+use std::borrow::{Borrow, BorrowMut};
+use std::cell::{Cell, RefCell};
+use std::net::{Ipv4Addr, TcpListener};
 use std::ops::Deref;
+use std::rc::Rc;
+use std::sync::RwLock;
+use ws::{connect, CloseCode, Handler};
 
 pub enum Message {
     Ping,
-    Hello
+    Hello,
 }
 
 #[test]
 fn start__app_starts() -> Result<()> {
     // Given
-    let expected_socket = SocketAddr::from(([127,0,0,1], 4444));
+    let expected_socket = SocketAddr::from(([127, 0, 0, 1], 4444));
     let sut = App::start;
 
     // When
@@ -34,12 +32,12 @@ fn start__app_starts() -> Result<()> {
 #[test]
 fn ping__live_socket_replies_with_pong() {
     // Given
-    let expected_socket = SocketAddr::from(([127,0,0,1], 4444));
+    let expected_socket = SocketAddr::from(([127, 0, 0, 1], 4444));
     let stringly_socket = expected_socket.to_string();
     let app = App::start().unwrap();
     let listener_socket = app.local_socket;
-    let msg_string = Rc::new(RefCell::new(String::new()));
-    let msg_string_ref = msg_string.clone();
+    let msg_string = RwLock::new(String::new());
+    let msg_string_ref = &msg_string;
 
     // When
     let sut = connect(stringly_socket, |out| {
@@ -47,11 +45,12 @@ fn ping__live_socket_replies_with_pong() {
 
         move |msg: ws::Message| {
             println!("Received message {:?}", msg);
-            (*msg_string_ref).replace(msg.to_string());
+            (*msg_string_ref.write().unwrap()) = msg.to_string();
             out.close(CloseCode::Normal)
         }
-    }).unwrap();
+    })
+    .unwrap();
 
     // Then
-    assert_eq!(&(*msg_string).into_inner(), "pong");
+    assert_eq!(&*msg_string.read().unwrap(), "pong");
 }

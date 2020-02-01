@@ -1,16 +1,16 @@
 #[cfg(test)]
 mod unit_tests;
 
-use std::thread::{JoinHandle, Builder};
 use std::default::Default;
 use std::net::SocketAddr;
+use std::thread::{Builder, JoinHandle};
 
-use iced::{Application, Command, Column, Element, Text};
 use get_if_addrs::{get_if_addrs, IfAddr};
+use iced::{Application, Column, Command, Element, Text};
 use ws;
 
-use crate::Result;
 use crate::Error;
+use crate::Result;
 use ws::listen;
 
 pub struct App {
@@ -19,20 +19,17 @@ pub struct App {
 }
 
 impl App {
-
     pub fn start() -> Result<Self> {
         // Build socket
         const PORT: u16 = 4444;
         let addrs = get_if_addrs()?;
-        let local_addr = addrs
-            .into_iter()
-            .nth(0)
-            .map_or_else(||Err(Error::NoIpAddrFound), |intrfc | {
-                match intrfc.addr {
-                    IfAddr::V4(addr) => Ok(addr.ip),
-                    IfAddr::V6(_) => Err(Error::IpTypeMismatch)
-                }
-            })?;
+        let local_addr = addrs.into_iter().nth(0).map_or_else(
+            || Err(Error::NoIpAddrFound),
+            |intrfc| match intrfc.addr {
+                IfAddr::V4(addr) => Ok(addr.ip),
+                IfAddr::V6(_) => Err(Error::IpTypeMismatch),
+            },
+        )?;
         let local_socket = SocketAddr::new(local_addr.into(), PORT);
 
         // Start listener
@@ -47,20 +44,22 @@ impl App {
                     // Use the out channel to send messages back
                     sender.send("pong".to_string())
                 }
-            }).map_err(Error::from)
+            })
+            .map_err(Error::from)
         })?;
 
-        Ok(Self { local_socket, listener_thread })
+        Ok(Self {
+            local_socket,
+            listener_thread,
+        })
     }
 }
 
 #[derive(Default)]
-pub(crate) struct ChatWindow {
-}
+pub(crate) struct ChatWindow {}
 
 #[derive(Debug, Clone, Copy)]
-pub enum Message {
-}
+pub enum Message {}
 
 impl Application for ChatWindow {
     type Message = Message;
@@ -77,10 +76,9 @@ impl Application for ChatWindow {
         Command::none()
     }
 
-    fn view (&mut self) -> Element<Message> {
+    fn view(&mut self) -> Element<Message> {
         Column::new()
-            .push(
-                Text::new("Welcome to the Chat App").size(50)
-            ).into()
+            .push(Text::new("Welcome to the Chat App").size(50))
+            .into()
     }
 }
