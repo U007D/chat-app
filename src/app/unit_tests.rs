@@ -7,6 +7,9 @@ use std::net::{TcpListener, Ipv4Addr};
 use ws::{connect, CloseCode, Handler};
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
+use std::borrow::{BorrowMut, Borrow};
+use std::any::Any;
+use std::ops::Deref;
 
 pub enum Message {
     Ping,
@@ -35,8 +38,8 @@ fn ping__live_socket_replies_with_pong() {
     let stringly_socket = expected_socket.to_string();
     let app = App::start().unwrap();
     let listener_socket = app.local_socket;
-    let refcell = RefCell::<String>::new(String::new());
-    let mut input_string = Rc::<RefCell<String>>::new(refcell);
+    let msg_string = Rc::new(RefCell::new(String::new()));
+    let msg_string_ref = msg_string.clone();
 
     // When
     let sut = connect(stringly_socket, |out| {
@@ -44,11 +47,11 @@ fn ping__live_socket_replies_with_pong() {
 
         move |msg: ws::Message| {
             println!("Received message {:?}", msg);
-            *input_string.borrow_mut() = msg.to_string();
+            (*msg_string_ref).replace(msg.to_string());
             out.close(CloseCode::Normal)
         }
     }).unwrap();
 
     // Then
-    assert_eq!(*Rc::make_mut(&mut input_string), RefCell::new(String::from("pong")));
+    assert_eq!(&(*msg_string).into_inner(), "pong");
 }
